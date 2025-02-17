@@ -1,7 +1,7 @@
 # Help Desk and Ticketing System
 
 ## Overview
-This project is a Help Desk and Ticketing System developed as part of the final group project for our course. The system is designed to manage and streamline the process of handling customer support requests and issues.
+This project is a Help Desk and Ticketing System developed as part of the final group project for our course. The system is designed to manage and streamline handling customer support requests and issues.
 
 ## Features
 - User Authentication: Secure login and registration for customers and support agents.
@@ -26,11 +26,3 @@ This project is a Help Desk and Ticketing System developed as part of the final 
 3. View and manage your tickets from the dashboard.
 4. Support agents can view and respond to assigned tickets.
 5. Generate reports to analyze ticket statistics and agent performance.
-
-## Contributing
-We welcome contributions from the community. To contribute, please follow these steps:
-1. Fork the repository.
-2. Create a new branch with a descriptive name.
-3. Make your changes and commit them with clear and concise commit messages.
-4. Push your changes to your forked repository.
-5. Create a pull request to the main repository.
