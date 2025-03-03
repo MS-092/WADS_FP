@@ -1,4 +1,5 @@
 # Help Desk and Ticketing System
+Simple overview of the begginningg of our project.
 
 ## Overview
 This project is a Help Desk and Ticketing System developed as part of the final group project for our course. The system is designed to manage and streamline handling customer support requests and issues.
@@ -11,14 +12,6 @@ This project is a Help Desk and Ticketing System developed as part of the final 
 - Notifications: Email notifications for ticket updates and responses.
 - Reporting: Generate reports on ticket status, response times, and agent performance.
 - Search and Filter: Advanced search and filtering options for tickets.
-
-## Technologies Used(unsure 100%)
-- Frontend: React.js, HTML, CSS
-- Backend: Node.js, Express.js
-- Database: MongoDB
-- Authentication: JWT (JSON Web Tokens)
-- Email Service: SendGrid
-- Reporting: Chart.js
 
 ## Usage
 1. Register a new account or log in with an existing account.
