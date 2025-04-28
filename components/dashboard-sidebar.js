@@ -78,7 +78,7 @@ export function DashboardSidebar({ isAdmin = false, children }) {
           <SidebarHeader className="border-b px-6 py-3">
             <div className="flex items-center gap-2 font-bold">
               <ShieldCheck className="h-6 w-6" />
-              <span>Help Desk Pro</span>
+              <span>Olfactory Engineers</span>
             </div>
           </SidebarHeader>
           <SidebarContent>

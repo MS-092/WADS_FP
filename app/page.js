@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, CheckCircle, Clock, MessageSquare, ShieldCheck } from "lucide-react"
 
 export default function Home() {
@@ -9,7 +10,7 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 font-bold">
             <ShieldCheck className="h-6 w-6" />
-            <span>Help Desk Pro</span>
+            <span>Olfactory Engineers</span>
           </div>
           <nav className="hidden md:flex gap-6">
             <Link href="#features" className="text-sm font-medium transition-colors hover:text-primary">
@@ -20,6 +21,9 @@ export default function Home() {
             </Link>
             <Link href="#pricing" className="text-sm font-medium transition-colors hover:text-primary">
               Pricing
+            </Link>
+            <Link href="/faq" className="text-sm font-medium transition-colors hover:text-primary">
+              FAQ
             </Link>
           </nav>
           <div className="flex items-center gap-4">
@@ -41,11 +45,10 @@ export default function Home() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                    Streamline Your Customer Support
+                    Premium Fragrance Support
                   </h1>
                   <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
-                    Our Help Desk system helps you manage support tickets efficiently, improve response times, and keep
-                    your customers happy.
+                    Our specialized help desk system streamlines support for perfume retailers, distributors, and enthusiasts. Get expert assistance for all your fragrance-related inquiries.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -60,49 +63,6 @@ export default function Home() {
                       Log in
                     </Button>
                   </Link>
-                </div>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="relative h-[350px] w-full overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-blue-950/50 dark:to-indigo-950/50">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-full max-w-md space-y-4 p-4">
-                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-950">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center dark:bg-blue-900">
-                            <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium">New Support Ticket</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Login issue - High Priority</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-950">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center dark:bg-green-900">
-                            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium">Resolved Ticket</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Payment issue - Resolved</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-950">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center dark:bg-yellow-900">
-                            <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium">Pending Ticket</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              Feature request - Medium Priority
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -133,20 +93,34 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                  Trusted by Companies Worldwide
+                </h2>
+                <p className="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+                  See what our customers have to say about their experience with Olfactory Engineers service
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((testimonial, index) => (
+                <Card key={index} className="flex flex-col justify-between">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{testimonial.name}</CardTitle>
+                    <CardDescription>{testimonial.role}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 dark:text-gray-400">{testimonial.content}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full border-t px-4 md:px-6">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          © {new Date().getFullYear()} Help Desk Pro. All rights reserved.
-        </p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
-      </footer>
     </div>
   )
 }
@@ -181,5 +155,23 @@ const features = [
     icon: ShieldCheck,
     title: "Reporting",
     description: "Generate detailed reports on ticket status, response times, and agent performance.",
+  },
+]
+
+const testimonials = [
+  {
+    name: "Sarah Johnson",
+    role: "Fashion Model",
+    content: "I have been using the services of this perfume business for the past 5 years. I have never had any issues with my orders.",
+  },
+  {
+    name: "Michael Chen",
+    role: "Actor",
+    content: "I enjoy both the products and services of this perfume business here",
+  },
+  {
+    name: "Emily Rodriguez",
+    role: "Musician",
+    content: "The ticket assignment feature is a game-changer. It ensures that each ticket is handled by the most qualified person, resulting in faster resolutions.",
   },
 ]
