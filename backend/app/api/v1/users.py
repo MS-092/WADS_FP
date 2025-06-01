@@ -125,10 +125,10 @@ def get_user(
     
     # Users can only view their own profile unless they're admin/agent
     if (current_user.id != user_id and 
-        current_user.role not in [UserRole.ADMIN, UserRole.SUPPORT_AGENT]):
+        current_user.role != UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to view this user"
+            detail="Admin access required"
         )
     
     return user
@@ -249,7 +249,6 @@ def get_user_stats(
     total_users = db.query(User).count()
     active_users = db.query(User).filter(User.is_active == True).count()
     customers = db.query(User).filter(User.role == UserRole.CUSTOMER).count()
-    agents = db.query(User).filter(User.role == UserRole.SUPPORT_AGENT).count()
     admins = db.query(User).filter(User.role == UserRole.ADMIN).count()
     
     return {
@@ -257,6 +256,5 @@ def get_user_stats(
         "active_users": active_users,
         "inactive_users": total_users - active_users,
         "customers": customers,
-        "support_agents": agents,
         "admins": admins
     } 

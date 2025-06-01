@@ -1,7 +1,10 @@
 {
-  "/login/page": "app/login/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/dashboard/tickets/new/page": "app/dashboard/tickets/new/page.js",
+  "/admin/tickets/page": "app/admin/tickets/page.js",
+  "/dashboard/tickets/page": "app/dashboard/tickets/page.js",
   "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/admin/tickets/[id]/page": "app/admin/tickets/[id]/page.js",
   "/admin/reports/page": "app/admin/reports/page.js",
-  "/admin/users/page": "app/admin/users/page.js",
-  "/admin/tickets/page": "app/admin/tickets/page.js"
+  "/admin/users/page": "app/admin/users/page.js"
 }

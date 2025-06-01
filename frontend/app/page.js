@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, CheckCircle, Clock, MessageSquare, ShieldCheck } from "lucide-react"
+import { ArrowRight, CheckCircle, Clock, MessageSquare, ShieldCheck, Shield } from "lucide-react"
 
 export default function Home() {
   return (
@@ -160,9 +160,9 @@ const features = [
     description: "Create, track, and resolve support tickets efficiently with our intuitive interface.",
   },
   {
-    icon: ShieldCheck,
-    title: "User Authentication",
-    description: "Secure login and registration for both customers and support agents.",
+    icon: Shield,
+    title: "Secure Authentication",
+    description: "Secure login and registration for both customers and admins.",
   },
   {
     icon: Clock,
@@ -171,8 +171,8 @@ const features = [
   },
   {
     icon: CheckCircle,
-    title: "Ticket Assignment",
-    description: "Assign tickets to specific support agents based on expertise and workload.",
+    title: "Smart Assignment",
+    description: "Assign tickets to specific admins based on expertise and workload.",
   },
   {
     icon: ArrowRight,

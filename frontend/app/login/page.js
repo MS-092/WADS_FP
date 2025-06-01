@@ -33,7 +33,7 @@ export default function LoginPage() {
       const user = JSON.parse(localStorage.getItem('user') || '{}')
       
       // Redirect based on role
-      if (user.role === 'admin' || user.role === 'support_agent') {
+      if (user.role === 'admin') {
         router.push("/admin/dashboard")
       } else {
         router.push("/dashboard")
@@ -105,7 +105,7 @@ export default function LoginPage() {
           <div className="mt-4 text-center text-xs text-muted-foreground">
             <p>Demo accounts:</p>
             <p>Admin: admin@helpdesk.com / admin123</p>
-            <p>Agent: agent@helpdesk.com / agent123</p>
+            <p>Customer: john@example.com / customer123</p>
           </div>
         </div>
       </div>

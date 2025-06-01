@@ -9,7 +9,6 @@ if __name__ == "__main__":
     import uvicorn
     from app.main import app
     
-    print("Starting Help Desk Pro API server...")
     print("Server will be available at: http://127.0.0.1:8000")
     print("API Documentation: http://127.0.0.1:8000/docs")
     

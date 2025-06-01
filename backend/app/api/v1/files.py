@@ -66,7 +66,7 @@ async def upload_ticket_attachment(
     # Check permissions
     from app.models.user import UserRole
     can_attach = (
-        current_user.role in [UserRole.ADMIN, UserRole.SUPPORT_AGENT] or
+        current_user.role == UserRole.ADMIN or
         ticket.user_id == current_user.id or
         ticket.assigned_to == current_user.id
     )
@@ -214,7 +214,7 @@ async def serve_ticket_file(
         
         # Check permissions
         can_access = (
-            current_user.role in [UserRole.ADMIN, UserRole.SUPPORT_AGENT] or
+            current_user.role == UserRole.ADMIN or
             ticket.user_id == current_user.id or
             ticket.assigned_to == current_user.id
         )
@@ -261,7 +261,7 @@ async def download_attachment(
     ticket = db.query(Ticket).filter(Ticket.id == attachment.ticket_id).first()
     
     can_access = (
-        current_user.role in [UserRole.ADMIN, UserRole.SUPPORT_AGENT] or
+        current_user.role == UserRole.ADMIN or
         ticket.user_id == current_user.id or
         ticket.assigned_to == current_user.id
     )

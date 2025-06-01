@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, MessageSquare, AlertTriangle, User, Bell } from "lucide-react"
-import Link from "next/link"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Bell, MessageSquare, Clock, CheckCircle, User, AlertTriangle } from "lucide-react"
 import { apiClient } from "@/lib/api"
+import { formatTimeAgo } from "@/lib/time-utils"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([])
@@ -62,57 +62,19 @@ export default function NotificationsPage() {
   const markAllAsRead = async () => {
     try {
       const unreadNotifications = notifications.filter(n => !n.is_read)
-      const promises = unreadNotifications.map(n => apiClient.markNotificationAsRead(n.id))
+      if (unreadNotifications.length === 0) return
       
-      await Promise.all(promises)
+      const unreadIds = unreadNotifications.map(n => n.id)
+      const response = await apiClient.markAllAsRead(unreadIds)
+      
+      if (response.error) {
+        console.error('Failed to mark all notifications as read:', response.error)
+        return
+      }
       
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
     } catch (err) {
       console.error('Error marking all notifications as read:', err)
-    }
-  }
-
-  const formatTimeAgo = (dateString) => {
-    if (!dateString) return 'Just now'
-    
-    try {
-      // Handle both ISO string and date object
-      const date = new Date(dateString)
-      
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return 'Unknown time'
-      }
-      
-      const now = new Date()
-      const diffInMs = now.getTime() - date.getTime()
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
-      
-      if (diffInMinutes < 1) return 'Just now'
-      if (diffInMinutes === 1) return '1 minute ago'
-      if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`
-      
-      const diffInHours = Math.floor(diffInMinutes / 60)
-      if (diffInHours === 1) return '1 hour ago'
-      if (diffInHours < 24) return `${diffInHours} hours ago`
-      
-      const diffInDays = Math.floor(diffInHours / 24)
-      if (diffInDays === 1) return '1 day ago'
-      if (diffInDays < 7) return `${diffInDays} days ago`
-      
-      const diffInWeeks = Math.floor(diffInDays / 7)
-      if (diffInWeeks === 1) return '1 week ago'
-      if (diffInWeeks < 4) return `${diffInWeeks} weeks ago`
-      
-      // For older dates, show the actual date
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-    } catch (error) {
-      console.error('Error formatting time:', error)
-      return 'Unknown time'
     }
   }
 
@@ -195,33 +157,41 @@ export default function NotificationsPage() {
 function NotificationList({ notifications, onMarkAsRead, formatTimeAgo }) {
   const getNotificationIcon = (type) => {
     switch (type) {
+      case "ticket_created":
+      case "TICKET_CREATED":
       case "new_ticket":
         return <MessageSquare className="h-5 w-5 text-blue-500" />
+      case "ticket_updated":
+      case "TICKET_UPDATED":
       case "ticket_update":
         return <Clock className="h-5 w-5 text-yellow-500" />
       case "ticket_resolved":
+      case "TICKET_RESOLVED":
         return <CheckCircle className="h-5 w-5 text-green-500" />
-      case "urgent":
-        return <AlertTriangle className="h-5 w-5 text-red-500" />
+      case "ticket_assigned":
+      case "TICKET_ASSIGNED":
       case "assignment":
         return <User className="h-5 w-5 text-purple-500" />
+      case "comment_added":
+      case "COMMENT_ADDED":
+      case "message_received":
+      case "MESSAGE_RECEIVED":
+        return <MessageSquare className="h-5 w-5 text-green-500" />
+      case "user_mentioned":
+      case "USER_MENTIONED":
+        return <User className="h-5 w-5 text-orange-500" />
+      case "file_uploaded":
+      case "FILE_UPLOADED":
+        return <MessageSquare className="h-5 w-5 text-cyan-500" />
+      case "system_announcement":
+      case "SYSTEM_ANNOUNCEMENT":
+        return <Bell className="h-5 w-5 text-indigo-500" />
+      case "urgent":
+      case "URGENT":
+        return <AlertTriangle className="h-5 w-5 text-red-500" />
       default:
         return <Bell className="h-5 w-5 text-gray-500" />
     }
-  }
-
-  const getNotificationLink = (notification) => {
-    // Use action_url if available, otherwise fallback to ticket link
-    if (notification.action_url) {
-      return notification.action_url
-    }
-    
-    const ticketId = notification.ticket_id || notification.ticketId
-    if (ticketId) {
-      return `/dashboard/tickets/${ticketId}`
-    }
-    
-    return '/dashboard/notifications'
   }
 
   if (notifications.length === 0) {
@@ -257,13 +227,6 @@ function NotificationList({ notifications, onMarkAsRead, formatTimeAgo }) {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{formatTimeAgo(notification.created_at)}</span>
                   <div className="flex items-center gap-2">
-                    {(notification.ticket_id || notification.ticketId) && (
-                      <Link href={getNotificationLink(notification)}>
-                        <Button variant="outline" size="sm">
-                          View Ticket
-                        </Button>
-                      </Link>
-                    )}
                     {!notification.is_read && (
                       <Button variant="ghost" size="sm" onClick={() => onMarkAsRead(notification.id)}>
                         Mark as read

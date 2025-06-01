@@ -164,6 +164,19 @@ class ApiClient {
     });
   }
 
+  // Add the missing getTicketComments method
+  async getTicketComments(ticketId: string, includeInternal: boolean = false) {
+    return this.request(`/api/v1/tickets/${ticketId}/comments?include_internal=${includeInternal}`);
+  }
+
+  // Alias for backward compatibility and to match page usage
+  async createComment(ticketId: string, commentData: {
+    content: string;
+    is_internal: boolean;
+  }) {
+    return this.addComment(ticketId, commentData);
+  }
+
   // User methods
   async getUsers() {
     return this.request('/api/v1/users/');
@@ -230,8 +243,19 @@ class ApiClient {
   }
 
   async markNotificationAsRead(id: string) {
-    return this.request(`/api/v1/notifications/${id}/read`, {
+    return this.request(`/api/v1/notifications/${id}`, {
       method: 'PUT',
+      body: JSON.stringify({ is_read: true }),
+    });
+  }
+
+  async markAllAsRead(notificationIds: number[]) {
+    return this.request('/api/v1/notifications/bulk-action', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        notification_ids: notificationIds, 
+        action: 'mark_read' 
+      }),
     });
   }
 

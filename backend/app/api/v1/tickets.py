@@ -40,14 +40,6 @@ def list_tickets(
     if current_user.role == UserRole.CUSTOMER:
         # Customers can only see their own tickets
         query = query.filter(Ticket.user_id == current_user.id)
-    elif current_user.role == UserRole.SUPPORT_AGENT:
-        # Agents can see tickets assigned to them or unassigned tickets
-        query = query.filter(
-            or_(
-                Ticket.assigned_to == current_user.id,
-                Ticket.assigned_to.is_(None)
-            )
-        )
     # Admins can see all tickets (no additional filter)
     
     # Apply filters
@@ -60,7 +52,8 @@ def list_tickets(
     if assigned_to is not None:
         query = query.filter(Ticket.assigned_to == assigned_to)
     
-    if user_id is not None and current_user.role in [UserRole.ADMIN, UserRole.SUPPORT_AGENT]:
+    # Apply filters - only admins can filter by user_id
+    if user_id is not None and current_user.role == UserRole.ADMIN:
         query = query.filter(Ticket.user_id == user_id)
     
     if search:
@@ -162,14 +155,6 @@ def get_ticket(
             detail="Not authorized to view this ticket"
         )
     
-    if (current_user.role == UserRole.SUPPORT_AGENT and 
-        ticket.assigned_to != current_user.id and 
-        ticket.assigned_to is not None):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to view this ticket"
-        )
-    
     return ticket
 
 @router.put("/{ticket_id}", response_model=TicketResponse)
@@ -195,10 +180,6 @@ async def update_ticket(
     
     if current_user.role == UserRole.ADMIN:
         can_update = True
-    elif current_user.role == UserRole.SUPPORT_AGENT:
-        # Agents can update tickets assigned to them or unassigned tickets
-        can_update = (ticket.assigned_to == current_user.id or 
-                     ticket.assigned_to is None)
     elif current_user.role == UserRole.CUSTOMER:
         # Customers can only update title/description of their own open tickets
         can_update = (ticket.user_id == current_user.id and 
@@ -310,19 +291,18 @@ async def assign_ticket(
             detail="Ticket not found"
         )
     
-    # Get agent user object for notifications
-    agent = None
+    # Only allow assignment to active admin users (no support agents)
     if agent_id is not None:
         agent = db.query(User).filter(
             User.id == agent_id,
-            User.role.in_([UserRole.SUPPORT_AGENT, UserRole.ADMIN]),
+            User.role == UserRole.ADMIN,
             User.is_active == True
         ).first()
         
         if not agent:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid agent ID"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Admin user not found or inactive"
             )
     
     old_assignee = ticket.assigned_to
@@ -387,9 +367,6 @@ async def add_comment(
     
     if current_user.role == UserRole.ADMIN:
         can_comment = True
-    elif current_user.role == UserRole.SUPPORT_AGENT:
-        can_comment = (ticket.assigned_to == current_user.id or 
-                      ticket.assigned_to is None)
     elif current_user.role == UserRole.CUSTOMER:
         can_comment = ticket.user_id == current_user.id
     
@@ -399,7 +376,7 @@ async def add_comment(
             detail="Not authorized to comment on this ticket"
         )
     
-    # Only agents/admins can create internal comments
+    # Only admins can create internal comments
     is_internal = comment_data.is_internal
     if is_internal and current_user.role == UserRole.CUSTOMER:
         is_internal = False
@@ -500,13 +477,7 @@ def get_ticket_stats(
     # Apply role-based filtering
     if current_user.role == UserRole.CUSTOMER:
         base_query = base_query.filter(Ticket.user_id == current_user.id)
-    elif current_user.role == UserRole.SUPPORT_AGENT:
-        base_query = base_query.filter(
-            or_(
-                Ticket.assigned_to == current_user.id,
-                Ticket.assigned_to.is_(None)
-            )
-        )
+    # Admins can see all tickets (no additional filter)
     
     # Get counts
     total = base_query.count()

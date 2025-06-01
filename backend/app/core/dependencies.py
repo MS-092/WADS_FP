@@ -66,12 +66,12 @@ def get_agent_or_admin_user(
     current_user: User = Depends(get_current_user)
 ) -> User:
     """
-    Require support agent or admin role
+    Require admin role (support agent role removed)
     """
-    if current_user.role not in [UserRole.SUPPORT_AGENT, UserRole.ADMIN]:
+    if current_user.role not in [UserRole.ADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Support agent or admin access required"
+            detail="Admin access required"
         )
     return current_user
 

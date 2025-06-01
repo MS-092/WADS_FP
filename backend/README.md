@@ -8,7 +8,7 @@ A complete help desk management system backend built with FastAPI, featuring aut
 - ✅ **Authentication System**: JWT tokens with refresh, role-based access
 - ✅ **User Management**: CRUD operations, role management, profile updates
 - ✅ **Ticket System**: Create, update, assign, comment on support tickets
-- ✅ **Role-Based Security**: Customer, Support Agent, Admin roles
+- ✅ **Role-Based Security**: Customer, Admin roles
 - ✅ **Database Models**: PostgreSQL with SQLAlchemy ORM
 - ✅ **API Documentation**: Auto-generated with FastAPI/Swagger
 
@@ -139,7 +139,7 @@ The system initializes with these test accounts:
 | Role | Email | Password | Description |
 |------|-------|----------|-------------|
 | Admin | admin@helpdesk.com | admin123 | Full system access |
-| Agent | agent@helpdesk.com | agent123 | Ticket management |
+| Admin | agent@helpdesk.com | agent123 | Full system access (migrated from agent) |
 | Customer | john@example.com | customer123 | Regular customer |
 | Customer | jane@example.com | customer123 | Regular customer |
 
@@ -216,7 +216,7 @@ curl -X POST "http://localhost:8000/api/v1/tickets/" \
 
 ### Users
 - ID, email, password_hash, first_name, last_name
-- role (customer/support_agent/admin)
+- role (customer/admin)
 - timestamps, activity tracking
 
 ### Tickets

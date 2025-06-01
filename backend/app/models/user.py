@@ -7,7 +7,6 @@ from app.core.database import Base
 
 class UserRole(PyEnum):
     CUSTOMER = "customer"
-    SUPPORT_AGENT = "support_agent"
     ADMIN = "admin"
 
 

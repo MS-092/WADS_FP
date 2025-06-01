@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, UserPlus, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { formatDateOnly } from "@/lib/time-utils"
 
 export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState([])
@@ -40,15 +41,6 @@ export default function AdminTicketsPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A"
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
   }
 
   // Filter tickets based on selected filters
@@ -165,8 +157,8 @@ export default function AdminTicketsPage() {
                   <TableHead>Title</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
-                  <TableHead>Assigned To</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead>Updated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -199,17 +191,8 @@ export default function AdminTicketsPage() {
                         {ticket.priority?.charAt(0).toUpperCase() + ticket.priority?.slice(1)}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      {ticket.assigned_agent ? (
-                        <div>
-                          <div className="font-medium">{ticket.assigned_agent.full_name}</div>
-                          <div className="text-sm text-muted-foreground">{ticket.assigned_agent.email}</div>
-                        </div>
-                      ) : (
-                        "Unassigned"
-                      )}
-                    </TableCell>
-                    <TableCell>{formatDate(ticket.created_at)}</TableCell>
+                    <TableCell>{formatDateOnly(ticket.created_at)}</TableCell>
+                    <TableCell>{formatDateOnly(ticket.updated_at)}</TableCell>
                     <TableCell className="text-right">
                       <Link href={`/admin/tickets/${ticket.id}`}>
                         <Button variant="ghost" size="sm">

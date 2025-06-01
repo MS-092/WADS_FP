@@ -6,8 +6,7 @@ A modern help desk and ticketing system built with **Next.js frontend** and **Fa
 
 ### ✅ **Phase 1 - Core Functionality**
 - **Authentication System**: JWT-based login/registration
-- **User Management**: Role-based access control (User, Support Agent, 
-)
+- **User Management**: Role-based access control (Customer, Admin)
 - **Ticket System**: Create, view, update, and manage support tickets
 - **Dashboard**: Real-time statistics and ticket overview
 
@@ -163,7 +162,7 @@ The backend comes with demo data. You can register new accounts or use existing 
 ## 🚀 Real-time Features
 
 ### WebSocket Integration
-- **Live Chat**: Real-time messaging between users and support agents
+- **Live Chat**: Real-time messaging between users and admins
 - **Connection Status**: Visual indicators for connection state
 - **Auto-reconnection**: Automatic reconnection on connection loss
 - **Message Persistence**: Chat history stored in database

@@ -26,6 +26,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from "@/lib/auth-context"
 import { useWebSocket } from "@/hooks/useWebSocket"
 import { apiClient } from "@/lib/api"
+import { formatTimeOnly } from "@/lib/time-utils"
 
 export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onToggle }) {
   const [messages, setMessages] = useState([])
@@ -62,7 +63,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
               text: latestMessage.message,
               sender: latestMessage.sender_id === user?.id ? (isAdmin ? "admin" : "user") : (isAdmin ? "user" : "admin"),
               senderName: latestMessage.sender_name,
-              timestamp: new Date(latestMessage.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              timestamp: formatTimeOnly(latestMessage.timestamp),
               avatar: "/placeholder.svg?height=32&width=32",
             }]
           }
@@ -88,7 +89,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           text: msg.message,
           sender: msg.sender_id === user?.id ? (isAdmin ? "admin" : "user") : (isAdmin ? "user" : "admin"),
           senderName: msg.sender_name,
-          timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          timestamp: formatTimeOnly(msg.timestamp),
           avatar: "/placeholder.svg?height=32&width=32",
         }))
         setMessages(formattedMessages)
@@ -124,7 +125,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           text: newMessage.trim(),
           sender: isAdmin ? "admin" : "user",
           senderName: user ? `${user.first_name} ${user.last_name}` : "You",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          timestamp: formatTimeOnly(new Date().toISOString()),
           avatar: "/placeholder.svg?height=32&width=32",
         }
         setMessages(prev => [...prev, message])
@@ -153,7 +154,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
             text: `📎 ${file.name}`,
             sender: isAdmin ? "admin" : "user",
             senderName: user ? `${user.first_name} ${user.last_name}` : "You",
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            timestamp: formatTimeOnly(new Date().toISOString()),
             avatar: "/placeholder.svg?height=32&width=32",
             isFile: true,
           }
@@ -167,7 +168,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
 
   if (!isOpen) {
     return (
-      <Button onClick={onToggle} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50" size="icon">
+      <Button onClick={onToggle} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-blue-600 hover:bg-blue-700" size="icon">
         <MessageCircle className="h-6 w-6" />
         {!isConnected && <WifiOff className="absolute -top-1 -right-1 h-4 w-4 text-red-500" />}
       </Button>
@@ -176,26 +177,26 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
 
   return (
     <Card
-      className={`fixed bottom-6 right-6 w-96 shadow-xl z-50 transition-all duration-300 ${
+      className={`fixed bottom-6 right-6 w-96 shadow-xl z-50 transition-all duration-300 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 ${
         isMinimized ? "h-16" : "h-[600px]"
       }`}
     >
-      <CardHeader className="flex flex-row items-center justify-between p-4 bg-primary text-primary-foreground rounded-t-lg">
+      <CardHeader className="flex flex-row items-center justify-between p-4 bg-blue-600 text-white rounded-t-lg">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-8 w-8 bg-white/20">
               <AvatarImage src="/placeholder.svg?height=32&width=32" />
-              <AvatarFallback>{isAdmin ? <User className="h-4 w-4" /> : <Shield className="h-4 w-4" />}</AvatarFallback>
+              <AvatarFallback className="bg-white/20 text-white">{isAdmin ? <User className="h-4 w-4" /> : <Shield className="h-4 w-4" />}</AvatarFallback>
             </Avatar>
             <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
               isConnected ? "bg-green-500" : "bg-red-500"
             }`}></div>
           </div>
           <div>
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white">
               {isAdmin ? "Customer Support" : "Help Desk Support"}
             </CardTitle>
-            <p className="text-xs opacity-90 flex items-center gap-1">
+            <p className="text-xs text-blue-100 flex items-center gap-1">
               {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
               {isConnected ? "Connected" : "Disconnected"}
               {isTyping && " • Typing..."}
@@ -203,15 +204,15 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/20">
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/20">
             <Phone className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/20">
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/20">
             <Video className="h-3 w-3" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/20">
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/20">
                 <MoreVertical className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -224,7 +225,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/20"
+            className="h-6 w-6 text-white hover:bg-white/20"
             onClick={() => setIsMinimized(!isMinimized)}
           >
             {isMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
@@ -232,7 +233,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 text-primary-foreground hover:bg-primary-foreground/20"
+            className="h-6 w-6 text-white hover:bg-white/20"
             onClick={onToggle}
           >
             <X className="h-3 w-3" />
@@ -244,7 +245,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
         <CardContent className="p-0 flex flex-col h-[540px]">
           {/* Connection Status */}
           {connectionError && (
-            <div className="px-4 py-2 bg-red-50 dark:bg-red-950 border-b">
+            <div className="px-4 py-2 bg-red-50 dark:bg-red-950 border-b border-gray-200 dark:border-gray-700">
               <p className="text-xs text-red-600 dark:text-red-400">
                 Connection error: {connectionError}
               </p>
@@ -255,7 +256,7 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
               {messages.length === 0 ? (
-                <div className="text-center text-muted-foreground text-sm py-8">
+                <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-8">
                   <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>Start a conversation...</p>
                   <p className="text-xs mt-1">We're here to help!</p>
@@ -269,9 +270,9 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
                     }`}
                   >
                     {message.sender !== (isAdmin ? "admin" : "user") && (
-                      <Avatar className="h-8 w-8 mt-1">
+                      <Avatar className="h-8 w-8 mt-1 bg-gray-100 dark:bg-gray-800">
                         <AvatarImage src={message.avatar} />
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
                           {message.senderName
                             ?.split(" ")
                             .map((n) => n[0])
@@ -282,25 +283,25 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
                     <div
                       className={`max-w-[80%] rounded-lg px-3 py-2 ${
                         message.sender === (isAdmin ? "admin" : "user")
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
                       }`}
                     >
                       <p className="text-sm">{message.text}</p>
                       <p
                         className={`text-xs mt-1 ${
                           message.sender === (isAdmin ? "admin" : "user")
-                            ? "text-primary-foreground/70"
-                            : "text-muted-foreground"
+                            ? "text-blue-100"
+                            : "text-gray-500 dark:text-gray-400"
                         }`}
                       >
                         {message.timestamp}
                       </p>
                     </div>
                     {message.sender === (isAdmin ? "admin" : "user") && (
-                      <Avatar className="h-8 w-8 mt-1">
+                      <Avatar className="h-8 w-8 mt-1 bg-gray-100 dark:bg-gray-800">
                         <AvatarImage src={message.avatar} />
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
                           {user ? `${user.first_name[0]}${user.last_name[0]}` : "You"}
                         </AvatarFallback>
                       </Avatar>
@@ -313,12 +314,12 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
           </ScrollArea>
 
           {/* Input */}
-          <div className="p-4 border-t">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Paperclip className="h-4 w-4" />
@@ -328,10 +329,10 @@ export function ChatBox({ isAdmin = false, ticketId = null, isOpen = false, onTo
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={isConnected ? "Type a message..." : "Connecting..."}
-                className="flex-1"
+                className="flex-1 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400"
                 disabled={!user}
               />
-              <Button size="icon" className="h-8 w-8" onClick={handleSendMessage} disabled={!newMessage.trim() || !user}>
+              <Button size="icon" className="h-8 w-8 bg-blue-600 hover:bg-blue-700" onClick={handleSendMessage} disabled={!newMessage.trim() || !user}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>

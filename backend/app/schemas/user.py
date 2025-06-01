@@ -45,6 +45,7 @@ class UserResponse(UserBase):
     
     class Config:
         from_attributes = True
+        use_enum_values = True
 
 
 class UserSummary(BaseModel):
@@ -56,4 +57,5 @@ class UserSummary(BaseModel):
     role: UserRole
     
     class Config:
-        from_attributes = True 
+        from_attributes = True
+        use_enum_values = True 

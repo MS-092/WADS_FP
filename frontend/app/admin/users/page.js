@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, UserPlus, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { formatDateOnly } from "@/lib/time-utils"
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -43,11 +44,7 @@ export default function UsersPage() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Never"
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return formatDateOnly(dateString)
   }
 
   const formatUserName = (user) => {

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CheckCircle, Clock, MessageSquare, Plus, Search, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { formatDateOnly } from "@/lib/time-utils"
 
 export default function TicketsPage() {
   const [tickets, setTickets] = useState([])
@@ -47,14 +48,6 @@ export default function TicketsPage() {
     
     return matchesSearch && matchesStatus && matchesPriority
   })
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
 
   return (
     <div className="space-y-6">
@@ -189,8 +182,8 @@ export default function TicketsPage() {
                         {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
                       </div>
                     </TableCell>
-                    <TableCell>{formatDate(ticket.created_at)}</TableCell>
-                    <TableCell>{formatDate(ticket.updated_at)}</TableCell>
+                    <TableCell>{formatDateOnly(ticket.created_at)}</TableCell>
+                    <TableCell>{formatDateOnly(ticket.updated_at)}</TableCell>
                     <TableCell className="text-right">
                       <Link href={`/dashboard/tickets/${ticket.id}`}>
                         <Button variant="ghost" size="sm">

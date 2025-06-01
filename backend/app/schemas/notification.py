@@ -51,10 +51,12 @@ class NotificationSummary(BaseModel):
     """Lightweight notification info for lists"""
     id: int
     title: str
+    message: str
     type: NotificationType
     priority: NotificationPriority
     is_read: bool
     created_at: datetime
+    ticket_id: Optional[int] = None
     action_url: Optional[str] = None
     
     class Config:

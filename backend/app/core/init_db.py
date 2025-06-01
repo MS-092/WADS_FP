@@ -32,16 +32,6 @@ def init_db() -> None:
             )
             db.add(admin_user)
             
-            # Create Support Agent
-            agent_user = User(
-                email="agent@helpdesk.com",
-                password_hash=get_password_hash("agent123"),
-                first_name="Support",
-                last_name="Agent",
-                role=UserRole.SUPPORT_AGENT
-            )
-            db.add(agent_user)
-            
             # Create Customer Users
             customer1 = User(
                 email="john@example.com",
@@ -80,7 +70,7 @@ def init_db() -> None:
                 priority=TicketPriority.MEDIUM,
                 status=TicketStatus.IN_PROGRESS,
                 user_id=customer2.id,
-                assigned_to=agent_user.id
+                assigned_to=admin_user.id
             )
             db.add(ticket2)
             
@@ -90,7 +80,7 @@ def init_db() -> None:
                 priority=TicketPriority.LOW,
                 status=TicketStatus.RESOLVED,
                 user_id=customer1.id,
-                assigned_to=agent_user.id
+                assigned_to=admin_user.id
             )
             db.add(ticket3)
             
@@ -110,7 +100,7 @@ def init_db() -> None:
             comment1 = Comment(
                 content="Hi John, I'll look into this login issue for you. Can you please confirm the email address you're trying to use?",
                 ticket_id=ticket1.id,
-                user_id=agent_user.id,
+                user_id=admin_user.id,
                 is_internal=False
             )
             db.add(comment1)
@@ -118,7 +108,7 @@ def init_db() -> None:
             comment2 = Comment(
                 content="We're currently working on implementing dark mode. This should be available in the next release.",
                 ticket_id=ticket2.id,
-                user_id=agent_user.id,
+                user_id=admin_user.id,
                 is_internal=False
             )
             db.add(comment2)
@@ -126,7 +116,7 @@ def init_db() -> None:
             comment3 = Comment(
                 content="Internal note: This is related to the recent pricing update. Need to send explanation email.",
                 ticket_id=ticket3.id,
-                user_id=agent_user.id,
+                user_id=admin_user.id,
                 is_internal=True
             )
             db.add(comment3)
@@ -144,7 +134,6 @@ def init_db() -> None:
             print("✅ Sample data created successfully!")
             print("\n📋 Sample Accounts:")
             print("👑 Admin: admin@helpdesk.com / admin123")
-            print("🛠️  Agent: agent@helpdesk.com / agent123")
             print("👤 Customer 1: john@example.com / customer123")
             print("👤 Customer 2: jane@example.com / customer123")
             print("\n🎫 Created 4 sample tickets with comments")

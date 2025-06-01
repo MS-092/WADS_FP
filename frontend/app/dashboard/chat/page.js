@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { MessageCircle, Search, Phone, Video, MoreHorizontal, Clock, CheckCircle, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { formatTimeOnly } from "@/lib/time-utils"
 
 export default function ChatPage() {
   const [chatRooms, setChatRooms] = useState([])
@@ -44,9 +45,12 @@ export default function ChatPage() {
       (chat.ticket_id && chat.ticket_id.toString().includes(searchQuery))
   )
 
-  const formatTime = (dateString) => {
-    if (!dateString) return ""
-    return new Date(dateString).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  const formatMessageTime = (dateString) => {
+    return formatTimeOnly(dateString)
+  }
+
+  const formatLastMessageTime = (dateString) => {
+    return formatTimeOnly(dateString)
   }
 
   const getRelativeTime = (dateString) => {
@@ -65,7 +69,7 @@ export default function ChatPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Live Chat</h2>
-        <p className="text-muted-foreground">Communicate with support agents in real-time</p>
+        <p className="text-muted-foreground">Communicate with admins in real-time</p>
       </div>
 
       {error && (
@@ -247,8 +251,8 @@ function ChatWindow({ chat }) {
     }
   }
 
-  const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  const formatMessageTime = (dateString) => {
+    return formatTimeOnly(dateString)
   }
 
   return (
@@ -333,7 +337,7 @@ function ChatWindow({ chat }) {
                       {message.content}
                     </div>
                     <div className="flex items-center gap-1 mt-1">
-                      <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
+                      <span className="text-xs text-muted-foreground">{formatMessageTime(message.created_at)}</span>
                       {message.user?.id === getCurrentUserId() && (
                         <div className="text-xs text-muted-foreground">
                           <CheckCircle className="h-3 w-3" />

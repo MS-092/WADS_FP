@@ -136,13 +136,16 @@ class NotificationService:
         """
         Send notification when ticket is created
         """
-        # Notify all support agents and admins
-        agents_and_admins = db.query(User).filter(
-            User.role.in_([UserRole.SUPPORT_AGENT, UserRole.ADMIN]),
+        # Notify all admins
+        admins = db.query(User).filter(
+            User.role == UserRole.ADMIN,
             User.is_active == True
         ).all()
         
-        for user in agents_and_admins:
+        for user in admins:
+            # Set admin-specific action URL for admin users
+            action_url = f"/admin/tickets/{ticket.id}"
+            
             await self.create_from_template(
                 db=db,
                 template_name="ticket_created",
@@ -155,14 +158,15 @@ class NotificationService:
                 },
                 ticket_id=ticket.id,
                 triggered_by=ticket.user_id,
-                action_url=f"/tickets/{ticket.id}"
+                action_url=action_url
             )
     
     async def notify_ticket_assigned(self, db: Session, ticket: Ticket, assigned_to: User, assigned_by: User):
         """
         Send notification when ticket is assigned
         """
-        # Notify the assigned agent
+        # Notify the assigned admin - use admin URL for admins
+        admin_action_url = f"/admin/tickets/{ticket.id}"
         await self.create_from_template(
             db=db,
             template_name="ticket_assigned",
@@ -174,10 +178,11 @@ class NotificationService:
             },
             ticket_id=ticket.id,
             triggered_by=assigned_by.id,
-            action_url=f"/tickets/{ticket.id}"
+            action_url=admin_action_url
         )
         
-        # Notify the customer
+        # Notify the customer - use customer URL
+        customer_action_url = f"/dashboard/tickets/{ticket.id}"
         await self.create_from_template(
             db=db,
             template_name="ticket_agent_assigned",
@@ -189,7 +194,7 @@ class NotificationService:
             },
             ticket_id=ticket.id,
             triggered_by=assigned_by.id,
-            action_url=f"/tickets/{ticket.id}"
+            action_url=customer_action_url
         )
     
     async def notify_comment_added(self, db: Session, comment, ticket: Ticket):
@@ -206,6 +211,17 @@ class NotificationService:
         recipients = [uid for uid in recipients if uid != comment.user_id]
         
         for user_id in recipients:
+            # Get user to determine the correct URL
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                continue
+                
+            # Determine action URL based on user role
+            if user.role == UserRole.ADMIN:
+                action_url = f"/admin/tickets/{ticket.id}#comment-{comment.id}"
+            else:  # Customer
+                action_url = f"/dashboard/tickets/{ticket.id}#comment-{comment.id}"
+                
             await self.create_from_template(
                 db=db,
                 template_name="comment_added",
@@ -218,14 +234,15 @@ class NotificationService:
                 },
                 ticket_id=ticket.id,
                 triggered_by=comment.user_id,
-                action_url=f"/tickets/{ticket.id}#comment-{comment.id}"
+                action_url=action_url
             )
     
     async def notify_ticket_resolved(self, db: Session, ticket: Ticket, resolved_by: User):
         """
         Send notification when ticket is resolved
         """
-        # Notify the customer
+        # Notify the customer - use customer dashboard URL
+        customer_action_url = f"/dashboard/tickets/{ticket.id}"
         await self.create_from_template(
             db=db,
             template_name="ticket_resolved",
@@ -237,7 +254,7 @@ class NotificationService:
             },
             ticket_id=ticket.id,
             triggered_by=resolved_by.id,
-            action_url=f"/tickets/{ticket.id}"
+            action_url=customer_action_url
         )
     
     async def notify_message_received(self, db: Session, message, room, sender: User):
