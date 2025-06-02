@@ -13,15 +13,49 @@ export default function RegisterPage() {
   const router = useRouter()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simulate registration - in a real app, this would be an API call
-    setTimeout(() => {
-      setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
+  const firstName = e.target.firstName.value;
+  const lastName = e.target.lastName.value;
+  const email = e.target.email.value;
+  const password = e.target.password.value;
+  const confirmPassword = e.target.confirmPassword.value;
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
+    setIsLoading(false);
+    return;
   }
+
+  const fullName = `${firstName} ${lastName}`;
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: fullName,
+        email,
+        password,
+        role: "user", // default role
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Registration failed");
+
+    // Redirect to login page after successful registration
+    router.push("/login");
+  } catch (err) {
+    alert(err.message || "Something went wrong");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">

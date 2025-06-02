@@ -1,10 +1,52 @@
+"use client";
+
 import Link from "next/link"
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { BarChart3, CheckCircle, Clock, MessageSquare, Users } from "lucide-react"
 
 export default function AdminDashboard() {
+  const [adminTickets, setAdminTickets] = useState([]);
+  const [counts, setCounts] = useState({ open: 0, pending: 0, resolved: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role?.toLowerCase() !== "admin") {
+      window.location.href = "/login";
+      return;
+    }
+
+    setLoading(false);
+
+    fetch("http://localhost:5000/api/tickets", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setAdminTickets(data);
+
+        const summary = { open: 0, pending: 0, resolved: 0 };
+        data.forEach((ticket) => {
+          const status = ticket.status.toLowerCase();
+          if (status === "open") summary.open++;
+          if (status === "pending") summary.pending++;
+          if (status === "resolved") summary.resolved++;
+        });
+
+        setCounts(summary);
+      })
+      .catch((err) => console.error("Failed to load admin tickets:", err));
+    }
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -18,7 +60,7 @@ export default function AdminDashboard() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">128</div>
+            <div className="text-2xl font-bold">{adminTickets.length}</div>
             <p className="text-xs text-muted-foreground">+24 from last month</p>
           </CardContent>
         </Card>
@@ -28,7 +70,7 @@ export default function AdminDashboard() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
+            <div className="text-2xl font-bold">{counts.open}</div>
             <p className="text-xs text-muted-foreground">+8 from last month</p>
           </CardContent>
         </Card>
@@ -38,7 +80,7 @@ export default function AdminDashboard() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">86</div>
+            <div className="text-2xl font-bold">{counts.resolved}</div>
             <p className="text-xs text-muted-foreground">+16 from last month</p>
           </CardContent>
         </Card>
@@ -60,7 +102,7 @@ export default function AdminDashboard() {
               <CardTitle>Recent Tickets</CardTitle>
               <CardDescription>Latest support tickets across all users</CardDescription>
             </div>
-            <Link href="/admin/tickets">
+            <Link href="/user/tickets">
               <Button variant="outline" size="sm">
                 View All
               </Button>
@@ -204,7 +246,7 @@ const performanceMetrics = [
 ]
 
 function getStatusColor(status) {
-  switch (status) {
+  switch (status.toLowerCase()) {
     case "Open":
       return "bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-400"
     case "In Progress":
@@ -217,7 +259,7 @@ function getStatusColor(status) {
 }
 
 function getPriorityColor(priority) {
-  switch (priority) {
+  switch (priority.toLowerCase()) {
     case "High":
       return "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400"
     case "Medium":

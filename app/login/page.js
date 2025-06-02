@@ -15,6 +15,7 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleSubmit = async (e) => {
+<<<<<<< Updated upstream
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -33,6 +34,46 @@ export default function LoginPage() {
 
     setIsLoading(false)
   }
+=======
+    e.preventDefault();
+    setIsLoading(true);
+
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+      
+      console.log("🔐 Token:", data.token);
+      console.log("🎭 Role:", data.role);
+      console.log("🧪 Login response:", data);
+      console.log("📦 Redirecting to:", data.role === "admin" ? "/admin/dashboard" : "/user/dashboard");
+      console.log("Router push is being called...");
+      
+      if (data.role?.toLowerCase() === "admin") {
+        window.location.href = "/admin/dashboard";
+      } else {
+        window.location.href = "/user/dashboard";
+      }
+    } catch (err) {
+      alert(err.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+>>>>>>> Stashed changes
 
   return (
     <div className="container relative flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -58,11 +99,24 @@ export default function LoginPage() {
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
+<<<<<<< Updated upstream
                 <Input id="email" type="email" required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" required />
+=======
+                <Input id="email" name="email" placeholder="name@example.com" required type="email" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link className="text-xs underline" href="#">
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input id="password" name="password" required type="password" />
+>>>>>>> Stashed changes
               </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
