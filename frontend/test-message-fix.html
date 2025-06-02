@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Message Author Fix Test</title>
+</head>
+<body>
+    <h1>Message Author Identification Test</h1>
+    
+    <script>
+        // Simulate the fixed formatMessageAuthor function
+        function formatMessageAuthor(message, user) {
+            // Check if message is from current user
+            // The message.sender.id should be compared with user.id (both are strings)
+            const isCurrentUser = message.sender?.id === user?.id || message.sender?._id === user?.id
+            
+            if (isCurrentUser) {
+                return {
+                    name: user.full_name || user.username || "You",
+                    role: user.role === "admin" ? "Admin" : user.role === "agent" ? "Agent" : "Customer",
+                    isCustomer: user.role === "customer"
+                }
+            } else {
+                // Message from agent/support
+                const senderRole = message.sender?.role || "agent"
+                return {
+                    name: message.sender?.full_name || message.sender?.username || "Support Agent",
+                    role: senderRole === "admin" ? "Admin" : senderRole === "agent" ? "Agent" : "Support",
+                    isCustomer: false
+                }
+            }
+        }
+
+        // Test scenarios
+        const testScenarios = [
+            {
+                name: "Customer viewing customer message",
+                user: { id: "user123", role: "customer", full_name: "John Doe" },
+                message: { 
+                    sender: { id: "user123", role: "customer", full_name: "John Doe" },
+                    content: "Hello, I need help"
+                },
+                expectedIsCustomer: true,
+                expectedName: "John Doe"
+            },
+            {
+                name: "Customer viewing admin message",
+                user: { id: "user123", role: "customer", full_name: "John Doe" },
+                message: { 
+                    sender: { id: "admin456", role: "admin", full_name: "Admin User" },
+                    content: "How can I help you?"
+                },
+                expectedIsCustomer: false,
+                expectedName: "Admin User"
+            },
+            {
+                name: "Admin viewing customer message",
+                user: { id: "admin456", role: "admin", full_name: "Admin User" },
+                message: { 
+                    sender: { id: "user123", role: "customer", full_name: "John Doe" },
+                    content: "Hello, I need help"
+                },
+                expectedIsCustomer: false,
+                expectedName: "John Doe"
+            },
+            {
+                name: "Admin viewing admin message",
+                user: { id: "admin456", role: "admin", full_name: "Admin User" },
+                message: { 
+                    sender: { id: "admin456", role: "admin", full_name: "Admin User" },
+                    content: "I'll help you with this"
+                },
+                expectedIsCustomer: false,
+                expectedName: "Admin User"
+            }
+        ];
+
+        // Run tests
+        console.log("Running message author identification tests...\n");
+        
+        let passedTests = 0;
+        let totalTests = testScenarios.length;
+
+        testScenarios.forEach((scenario, index) => {
+            const result = formatMessageAuthor(scenario.message, scenario.user);
+            
+            const passed = result.isCustomer === scenario.expectedIsCustomer && 
+                          result.name === scenario.expectedName;
+            
+            console.log(`Test ${index + 1}: ${scenario.name}`);
+            console.log(`  Expected: isCustomer=${scenario.expectedIsCustomer}, name="${scenario.expectedName}"`);
+            console.log(`  Got:      isCustomer=${result.isCustomer}, name="${result.name}"`);
+            console.log(`  Result:   ${passed ? "PASS" : "FAIL"}\n`);
+            
+            if (passed) passedTests++;
+        });
+
+        console.log(`Tests completed: ${passedTests}/${totalTests} passed`);
+        
+        // Display results in the HTML
+        document.body.innerHTML += `
+            <h2>Test Results</h2>
+            <p><strong>${passedTests}/${totalTests} tests passed</strong></p>
+            <div id="results"></div>
+        `;
+        
+        const resultsDiv = document.getElementById('results');
+        testScenarios.forEach((scenario, index) => {
+            const result = formatMessageAuthor(scenario.message, scenario.user);
+            const passed = result.isCustomer === scenario.expectedIsCustomer && 
+                          result.name === scenario.expectedName;
+            
+            resultsDiv.innerHTML += `
+                <div style="border: 1px solid #ccc; margin: 10px 0; padding: 10px; background: ${passed ? '#e8f5e8' : '#ffe8e8'}">
+                    <h3>Test ${index + 1}: ${scenario.name}</h3>
+                    <p><strong>Expected:</strong> isCustomer=${scenario.expectedIsCustomer}, name="${scenario.expectedName}"</p>
+                    <p><strong>Got:</strong> isCustomer=${result.isCustomer}, name="${result.name}"</p>
+                    <p><strong>Result:</strong> <span style="color: ${passed ? 'green' : 'red'}">${passed ? "PASS" : "FAIL"}</span></p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html> 

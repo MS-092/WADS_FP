@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Browser Storage</title>
+</head>
+<body>
+    <h1>Clear Browser Storage</h1>
+    <button onclick="clearStorage()">Clear All Storage</button>
+    <div id="result"></div>
+    
+    <script>
+        function clearStorage() {
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                
+                // Show current storage status
+                document.getElementById('result').innerHTML = `
+                    <p>✅ Storage cleared successfully!</p>
+                    <p>localStorage length: ${localStorage.length}</p>
+                    <p>sessionStorage length: ${sessionStorage.length}</p>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <p>❌ Error clearing storage: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // Show current storage status on load
+        window.onload = function() {
+            const authToken = localStorage.getItem('auth_token');
+            document.getElementById('result').innerHTML = `
+                <h3>Current Storage Status:</h3>
+                <p>localStorage length: ${localStorage.length}</p>
+                <p>sessionStorage length: ${sessionStorage.length}</p>
+                <p>auth_token exists: ${!!authToken}</p>
+                ${authToken ? `<p>Token: ${authToken.substring(0, 20)}...</p>` : ''}
+            `;
+        };
+    </script>
+</body>
+</html> 
