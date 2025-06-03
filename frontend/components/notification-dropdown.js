@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback, memo } from 'react'
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,79 +17,83 @@ import { AlertTriangle, Bell, CheckCircle, Clock, MessageSquare, User } from "lu
 import { notificationAPI } from "@/lib/api"
 import { useWebSocketContext } from "./providers/WebSocketProvider"
 
-export function NotificationDropdown({ isAdmin = false }) {
-  const [notifications, setNotifications] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [loading, setLoading] = useState(false)
-  
-  // Get WebSocket context for real-time updates
+export const NotificationDropdown = memo(function NotificationDropdown({ isAdmin = false }) {
   const { 
     notifications: wsNotifications, 
-    markNotificationAsRead: wsMarkAsRead,
-    onNotification,
+    onNotification, 
     onTicketUpdate,
-    isConnected
+    markNotificationAsRead: wsMarkAsRead 
   } = useWebSocketContext()
+  
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(true)
 
-  // Fetch notifications from API
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await notificationAPI.getNotifications({ per_page: 10 })
-      
-      if (response && response.notifications) {
-        setNotifications(response.notifications)
-        setUnreadCount(response.unread_count || 0)
-      }
+      console.log('[NotificationDropdown] Fetching notifications for admin:', isAdmin)
+      const response = await notificationAPI.getNotifications({ page: 1, per_page: 10 })
+      console.log('[NotificationDropdown] API Response:', response)
+      const fetchedNotifications = response.notifications || []
+      console.log('[NotificationDropdown] Setting notifications:', fetchedNotifications)
+      setNotifications(fetchedNotifications)
+      setUnreadCount(fetchedNotifications.filter(n => !n.is_read).length)
     } catch (error) {
-      console.error('Error fetching notifications:', error)
-      // Fall back to empty state on error
-      setNotifications([])
-      setUnreadCount(0)
+      console.error('[NotificationDropdown] Error fetching notifications:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [isAdmin])
 
-  // Fetch notifications on component mount
   useEffect(() => {
     fetchNotifications()
+  }, [fetchNotifications])
+
+  // Memoize the new notification handler to prevent unnecessary re-renders
+  const handleNewNotification = useCallback((newNotification) => {
+    console.log('[NotificationDropdown] New notification received:', newNotification)
+    setNotifications(prev => {
+      const exists = prev.some(n => n._id === newNotification._id)
+      if (!exists) {
+        setUnreadCount(count => count + 1)
+        return [newNotification, ...prev.slice(0, 9)] // Keep max 10 items
+      }
+      return prev
+    })
   }, [])
 
-  // Listen for real-time notifications
-  useEffect(() => {
-    const unsubscribeNotifications = onNotification((newNotification) => {
-      setNotifications(prev => {
-        // Check if notification already exists
-        const exists = prev.some(n => n._id === newNotification._id)
-        if (!exists) {
-          setUnreadCount(count => count + 1)
-          return [newNotification, ...prev.slice(0, 9)] // Keep max 10 items
-        }
-        return prev
-      })
-    })
-
-    const unsubscribeTicketUpdates = onTicketUpdate((ticketUpdate) => {
-      // Refresh notifications when tickets are updated
-      // This ensures we have the latest ticket-related notifications
+  // Memoize the ticket update handler
+  const handleTicketUpdate = useCallback((ticketUpdate) => {
+    // Only refresh notifications for significant ticket updates
+    // This reduces API calls and prevents excessive re-renders
+    if (ticketUpdate.status === 'closed' || ticketUpdate.status === 'assigned') {
       fetchNotifications()
-    })
+    }
+  }, [fetchNotifications])
+
+  // Listen for real-time notifications with stable handlers
+  useEffect(() => {
+    const unsubscribeNotifications = onNotification(handleNewNotification)
+    const unsubscribeTicketUpdates = onTicketUpdate(handleTicketUpdate)
 
     return () => {
       unsubscribeNotifications()
       unsubscribeTicketUpdates()
     }
-  }, [onNotification, onTicketUpdate])
+  }, [onNotification, onTicketUpdate, handleNewNotification, handleTicketUpdate])
 
-  // Merge WebSocket notifications with API notifications
+  // Merge WebSocket notifications with API notifications - but only when there are new ones
   useEffect(() => {
+    console.log('[NotificationDropdown] WebSocket notifications update:', wsNotifications.length, 'notifications')
     if (wsNotifications.length > 0) {
+      console.log('[NotificationDropdown] Merging WebSocket notifications:', wsNotifications)
       setNotifications(prev => {
         const merged = [...wsNotifications, ...prev]
         const unique = merged.filter((notification, index, arr) => 
           arr.findIndex(n => n._id === notification._id) === index
         )
+        console.log('[NotificationDropdown] Final merged notifications:', unique.slice(0, 10))
         return unique.slice(0, 10) // Keep max 10 items
       })
     }
@@ -123,132 +127,126 @@ export function NotificationDropdown({ isAdmin = false }) {
     }
   }
 
-  const getNotificationIcon = (type) => {
+  // Memoize the notification icon function to prevent recreation
+  const getNotificationIcon = useCallback((type) => {
     switch (type) {
-      case "ticket_created":
-      case "new_ticket":
-        return <MessageSquare className="h-4 w-4 text-blue-500" />
       case "ticket_assigned":
-      case "assignment":
-        return <User className="h-4 w-4 text-purple-500" />
+        return <User className="h-4 w-4" />
       case "ticket_status_changed":
-      case "ticket_update":
-        return <Clock className="h-4 w-4 text-yellow-500" />
-      case "ticket_resolved":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "urgent":
-      case "system_alert":
-        return <AlertTriangle className="h-4 w-4 text-red-500" />
+        return <CheckCircle className="h-4 w-4" />
+      case "ticket_comment":
+        return <MessageSquare className="h-4 w-4" />
+      case "system":
+        return <AlertTriangle className="h-4 w-4" />
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />
+        return <Bell className="h-4 w-4" />
     }
-  }
+  }, [])
 
-  const getNotificationLink = (notification) => {
-    if (notification.data?.ticket_id || notification.ticket_id) {
-      const ticketId = notification.data?.ticket_id || notification.ticket_id
-      if (isAdmin) {
-        return `/admin/tickets/${ticketId}`
-      }
-      return `/dashboard/tickets/${ticketId}`
+  // Memoize the status color function
+  const getStatusColor = useCallback((type) => {
+    switch (type) {
+      case "ticket_assigned":
+        return "bg-blue-500"
+      case "ticket_status_changed":
+        return "bg-green-500"
+      case "ticket_comment":
+        return "bg-purple-500"
+      case "system":
+        return "bg-red-500"
+      default:
+        return "bg-gray-500"
     }
-    
-    // Fallback to notifications page
-    if (isAdmin) {
-      return `/admin/notifications`
-    }
-    return `/dashboard/notifications`
-  }
-
-  const formatTime = (dateString) => {
-    if (!dateString) return 'Unknown time'
-    try {
-      const date = new Date(dateString)
-      const now = new Date()
-      const diffMs = now - date
-      const diffMins = Math.floor(diffMs / 60000)
-      const diffHours = Math.floor(diffMins / 60)
-      const diffDays = Math.floor(diffHours / 24)
-
-      if (diffMins < 1) return 'Just now'
-      if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`
-      if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
-      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
-    } catch {
-      return dateString
-    }
-  }
+  }, [])
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs p-0"
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
+            <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+              {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
-          {/* Connection status indicator */}
-          <div className={`absolute top-0 right-0 w-2 h-2 rounded-full ${
-            isConnected ? 'bg-green-500' : 'bg-gray-400'
-          }`} />
+          <span className="sr-only">Notifications</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
               Mark all read
             </Button>
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <ScrollArea className="h-[400px]">
-          {loading ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">Loading notifications...</div>
+        <ScrollArea className="max-h-80">
+          {loading && notifications.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              <Clock className="h-4 w-4 mx-auto mb-2" />
+              Loading notifications...
+            </div>
           ) : notifications.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              <Bell className="h-4 w-4 mx-auto mb-2" />
+              No notifications yet
+            </div>
           ) : (
-            notifications.map((notification) => (
-              <DropdownMenuItem key={notification._id} className="p-0">
-                <Link
-                  href={getNotificationLink(notification)}
-                  className="w-full p-3 flex items-start gap-3 hover:bg-muted/50"
-                  onClick={() => !notification.is_read && markAsRead(notification._id)}
-                >
-                  <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p
-                        className={`text-sm font-medium truncate ${!notification.is_read ? "text-foreground" : "text-muted-foreground"}`}
-                      >
-                        {notification.title}
-                      </p>
-                      {!notification.is_read && <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />}
+            notifications.map((notification, index) => {
+              // console.log('[NotificationDropdown] Rendering notification:', notification.title, 'ID:', notification._id)
+              return (
+                <DropdownMenuItem key={notification._id || index} className="p-0">
+                  <div
+                    className={`w-full p-3 cursor-pointer transition-colors ${
+                      notification.is_read ? "opacity-60" : "bg-blue-50 dark:bg-blue-950"
+                    }`}
+                    onClick={() => {
+                      if (!notification.is_read) {
+                        markAsRead(notification._id)
+                      }
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`rounded-full p-1 ${getStatusColor(notification.notification_type)}`}>
+                        {getNotificationIcon(notification.notification_type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium text-sm truncate">{notification.title}</p>
+                          {!notification.is_read && <div className="h-2 w-2 bg-blue-600 rounded-full flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{notification.message}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(notification.created_at).toLocaleDateString()}
+                          </span>
+                          {notification.data?.ticket_id && (
+                            <Link
+                              href={`/dashboard/tickets/${notification.data.ticket_id}`}
+                              className="text-xs text-blue-600 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              View Ticket
+                            </Link>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{notification.message}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{formatTime(notification.created_at)}</p>
                   </div>
-                </Link>
-              </DropdownMenuItem>
-            ))
+                </DropdownMenuItem>
+              )
+            })
           )}
         </ScrollArea>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link 
-            href={isAdmin ? "/admin/notifications" : "/dashboard/notifications"}
-            className="w-full text-center"
-          >
+          <Link href="/dashboard/notifications" className="w-full text-center text-sm">
             View all notifications
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
-}
+})

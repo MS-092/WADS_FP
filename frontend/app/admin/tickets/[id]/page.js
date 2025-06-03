@@ -151,12 +151,12 @@ export default function AdminTicketManagePage() {
       setSaving(true)
       // Map display values to backend values
       const categoryMap = {
-        "Technical": "technical",
-        "Billing": "billing", 
-        "General": "general",
-        "Feature Request": "feature_request",
-        "Bug Report": "bug_report",
-        "Account": "account"
+        "Allergic Reactions": "technical",
+        "Order & Billing": "billing", 
+        "General Questions": "general",
+        "Fragrance Recommendations": "feature_request",
+        "Website Issues": "bug_report",
+        "Defective/Faulty Products": "account"
       }
       
       const backendCategory = categoryMap[newCategory] || newCategory.toLowerCase()
@@ -375,8 +375,8 @@ export default function AdminTicketManagePage() {
       </Button>
       
       <div>
-        <h1 className="text-2xl font-bold">Ticket #{ticket._id?.slice(-6) || ticketId}</h1>
-        <p className="text-muted-foreground">Manage and respond to customer ticket</p>
+        <h1 className="text-2xl font-bold">Order #{ticket._id?.slice(-6) || ticketId}</h1>
+        <p className="text-muted-foreground">Manage and respond to customer order inquiry</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -461,8 +461,8 @@ export default function AdminTicketManagePage() {
           {/* Responses and Communication */}
           <Card>
             <CardHeader>
-              <CardTitle>Communication History</CardTitle>
-              <CardDescription>All responses and internal notes for this ticket</CardDescription>
+              <CardTitle>Customer Communication</CardTitle>
+              <CardDescription>All customer responses and internal notes for this order inquiry</CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="conversation">
@@ -512,7 +512,7 @@ export default function AdminTicketManagePage() {
                   <div className="space-y-4">
                     <Label>Send Response to Customer</Label>
                     <Textarea
-                      placeholder="Type your response to the customer..."
+                      placeholder="Type your response about their fragrance inquiry or order..."
                       value={newResponse}
                       onChange={(e) => setNewResponse(e.target.value)}
                       className="min-h-[100px]"
@@ -568,7 +568,7 @@ export default function AdminTicketManagePage() {
                   <div className="space-y-4">
                     <Label>Add Internal Note</Label>
                     <Textarea
-                      placeholder="Add an internal note (not visible to customer)..."
+                      placeholder="Add an internal note about this order or customer (not visible to customer)..."
                       value={internalNote}
                       onChange={(e) => setInternalNote(e.target.value)}
                       className="min-h-[100px]"

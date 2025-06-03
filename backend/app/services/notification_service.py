@@ -128,7 +128,7 @@ class NotificationService:
                     message=message,
                     data={
                         "ticket_id": ticket_id,
-                        "ticket_subject": ticket.get("subject", ""),
+                        "ticket_title": ticket.get("title", ""),
                         "ticket_status": ticket.get("status", ""),
                         "ticket_priority": ticket.get("priority", "medium")
                     },
@@ -138,7 +138,7 @@ class NotificationService:
             # Broadcast ticket update to connected users
             ticket_data = {
                 "id": ticket_id,
-                "subject": ticket.get("subject", ""),
+                "subject": ticket.get("title", ""),
                 "status": ticket.get("status", ""),
                 "priority": ticket.get("priority", "medium"),
                 "updated_at": datetime.utcnow().isoformat(),
@@ -181,7 +181,7 @@ class NotificationService:
             creator = ticket["creator"][0] if ticket["creator"] else {}
             
             title = f"New {ticket.get('priority', 'medium').title()} Priority Ticket"
-            message = f"New ticket '{ticket.get('subject', '')}' submitted by {creator.get('full_name', 'Unknown User')}"
+            message = f"New ticket '{ticket.get('title', '')}' submitted by {creator.get('full_name', 'Unknown User')}"
             
             # Create notifications for all admins/agents
             await NotificationService.create_ticket_notification(
@@ -195,7 +195,7 @@ class NotificationService:
             # Broadcast new ticket alert
             ticket_alert_data = {
                 "id": ticket_id,
-                "subject": ticket.get("subject", ""),
+                "title": ticket.get("title", ""),
                 "priority": ticket.get("priority", "medium"),
                 "status": ticket.get("status", ""),
                 "created_by": {
@@ -227,7 +227,7 @@ class NotificationService:
                 return
             
             title = "New Ticket Assignment"
-            message = f"You have been assigned ticket '{ticket.get('subject', '')}' by {assigner.get('full_name', 'Admin')}"
+            message = f"You have been assigned ticket '{ticket.get('title', '')}' by {assigner.get('full_name', 'Admin')}"
             
             await NotificationService.create_and_broadcast_notification(
                 user_id=assigned_to_id,
@@ -236,6 +236,9 @@ class NotificationService:
                 message=message,
                 data={
                     "ticket_id": ticket_id,
+                    "ticket_title": ticket.get("title", ""),
+                    "ticket_status": ticket.get("status", ""),
+                    "ticket_priority": ticket.get("priority", "medium"),
                     "assigned_by": {
                         "id": assigned_by_id,
                         "name": assigner.get("full_name", ""),
@@ -262,7 +265,7 @@ class NotificationService:
                 return
             
             title = f"Ticket Status Updated: {new_status.title()}"
-            message = f"Ticket '{ticket.get('subject', '')}' status changed from {old_status} to {new_status}"
+            message = f"Ticket '{ticket.get('title', '')}' status changed from {old_status} to {new_status}"
             
             # Notify ticket creator
             creator_id = str(ticket["created_by"])
@@ -273,6 +276,7 @@ class NotificationService:
                 message=message,
                 data={
                     "ticket_id": ticket_id,
+                    "ticket_title": ticket.get("title", ""),
                     "old_status": old_status,
                     "new_status": new_status,
                     "updated_by": {
@@ -293,6 +297,7 @@ class NotificationService:
                     message=message,
                     data={
                         "ticket_id": ticket_id,
+                        "ticket_title": ticket.get("title", ""),
                         "old_status": old_status,
                         "new_status": new_status,
                         "updated_by": {
@@ -321,7 +326,7 @@ class NotificationService:
                 return
             
             title = "Ticket Resolved"
-            message = f"Your ticket '{ticket.get('subject', '')}' has been resolved by {resolved_by.get('full_name', 'Support Agent')}"
+            message = f"Your ticket '{ticket.get('title', '')}' has been resolved by {resolved_by.get('full_name', 'Support Agent')}"
             
             if resolution_note:
                 message += f". Resolution: {resolution_note}"
@@ -334,6 +339,9 @@ class NotificationService:
                 message=message,
                 data={
                     "ticket_id": ticket_id,
+                    "ticket_title": ticket.get("title", ""),
+                    "ticket_status": ticket.get("status", ""),
+                    "ticket_priority": ticket.get("priority", "medium"),
                     "resolution_note": resolution_note,
                     "resolved_by": {
                         "id": resolved_by_id,

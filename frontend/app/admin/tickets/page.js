@@ -112,7 +112,7 @@ export default function AdminTicketsPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading tickets...</span>
+          <span>Loading inquiries...</span>
         </div>
       </div>
     )
@@ -136,9 +136,9 @@ export default function AdminTicketsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">All Tickets</h2>
+          <h2 className="text-2xl font-bold tracking-tight">All Order Inquiries</h2>
           <p className="text-muted-foreground">
-            Manage and assign support tickets ({pagination.total} total)
+            Manage and assign customer fragrance order inquiries ({pagination.total} total)
           </p>
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function AdminTicketsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <CardDescription>Filter tickets by status, priority, or search by title or user</CardDescription>
+          <CardDescription>Filter inquiries by status, priority, or search by title or customer</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 md:flex-row">
@@ -155,7 +155,7 @@ export default function AdminTicketsPage() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search tickets or users..."
+                  placeholder="Search inquiries or customers..."
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -193,8 +193,8 @@ export default function AdminTicketsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Ticket Management</CardTitle>
-          <CardDescription>A list of all support tickets in the system</CardDescription>
+          <CardTitle>Inquiry Management</CardTitle>
+          <CardDescription>A list of all customer fragrance order inquiries in the system</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -202,7 +202,7 @@ export default function AdminTicketsPage() {
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>User</TableHead>
-                <TableHead>Title</TableHead>
+                <TableHead>Order ID</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Assigned To</TableHead>
@@ -214,7 +214,7 @@ export default function AdminTicketsPage() {
               {filteredTickets.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    No tickets found matching your criteria
+                    No inquiries found matching your criteria
                   </TableCell>
                 </TableRow>
               ) : (
@@ -268,7 +268,7 @@ export default function AdminTicketsPage() {
             <div className="flex items-center justify-between pt-4">
               <div className="text-sm text-muted-foreground">
                 Showing {Math.min((pagination.page - 1) * pagination.per_page + 1, pagination.total)} to{" "}
-                {Math.min(pagination.page * pagination.per_page, pagination.total)} of {pagination.total} tickets
+                {Math.min(pagination.page * pagination.per_page, pagination.total)} of {pagination.total} inquiries
               </div>
               <div className="flex space-x-2">
                 <Button

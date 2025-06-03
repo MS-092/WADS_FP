@@ -105,4 +105,16 @@ temp/
 # Config files that might contain secrets
 config.json
 secrets.yaml
-secrets.yml 
+secrets.yml
+
+# Additional patterns to prevent future issues
+# Test files that might be temporary
+test_*.js
+debug_*.js
+debug_*.py
+*_debug.*
+*_test.*
+
+# Temporary HTML files
+*.html
+public/test-* 

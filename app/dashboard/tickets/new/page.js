@@ -28,19 +28,19 @@ export default function NewTicketPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Create New Ticket</h2>
-        <p className="text-muted-foreground">Submit a new support ticket for assistance</p>
+        <h2 className="text-2xl font-bold tracking-tight">Create New Order Inquiry</h2>
+        <p className="text-muted-foreground">Submit a new inquiry about your fragrance order or product question</p>
       </div>
       <Card>
         <form onSubmit={handleSubmit}>
           <CardHeader>
-            <CardTitle>Ticket Details</CardTitle>
-            <CardDescription>Please provide as much detail as possible to help us assist you better</CardDescription>
+            <CardTitle>Order Inquiry Details</CardTitle>
+            <CardDescription>Please provide details about your fragrance order or product question so our specialists can assist you</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" placeholder="Brief description of the issue" required />
+              <Label htmlFor="title">Order ID</Label>
+              <Input id="title" placeholder="Your Order ID" required />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -50,11 +50,11 @@ export default function NewTicketPage() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="technical">Technical Issue</SelectItem>
-                    <SelectItem value="billing">Billing</SelectItem>
-                    <SelectItem value="account">Account</SelectItem>
-                    <SelectItem value="feature">Feature Request</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="technical">Allergic Reactions</SelectItem>
+                    <SelectItem value="billing">Order & Billing</SelectItem>
+                    <SelectItem value="account">Defective/Faulty Products</SelectItem>
+                    <SelectItem value="feature">Fragrance Recommendations</SelectItem>
+                    <SelectItem value="other">General Questions</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -76,7 +76,7 @@ export default function NewTicketPage() {
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="Please describe your issue in detail"
+                placeholder="Please describe your fragrance inquiry, order concern, or product question in detail"
                 className="min-h-[150px]"
                 required
               />
@@ -94,7 +94,7 @@ export default function NewTicketPage() {
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Ticket"}
+              {isSubmitting ? "Submitting..." : "Submit Inquiry"}
             </Button>
           </CardFooter>
         </form>
@@ -103,13 +103,13 @@ export default function NewTicketPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <LifeBuoy className="h-5 w-5" />
-            Need Immediate Help?
+            Need Immediate Fragrance Assistance?
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            For urgent issues, you can contact our support team directly at <strong>support@helpdeskpro.com</strong> or
-            call <strong>1-800-HELP-NOW</strong> during business hours.
+            For urgent fragrance orders or product questions, you can contact our fragrance specialists directly at <strong>fragrancehelp@perfumecollection.com</strong> or
+            call <strong>1-800-SCENT-NOW</strong> during business hours.
           </p>
         </CardContent>
       </Card>

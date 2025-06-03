@@ -10,8 +10,9 @@ from bson import ObjectId
 
 from app.database.connection import get_database
 from app.models.user import UserResponse, UserUpdate, UserRole, UserStatus, UserProfile
-from app.models.ticket import TicketStats, TicketSummary, PaginatedTickets
+from app.models.ticket import TicketStats, TicketSummary, PaginatedTickets, TicketStatus, TicketResponse, TicketCreate
 from app.utils.auth import get_admin_user
+from app.services.notification_service import notification_service
 
 router = APIRouter()
 
@@ -360,4 +361,92 @@ async def get_all_tickets_admin(
         pages=pages,
         has_next=page < pages,
         has_prev=page > 1
-    ) 
+    )
+
+
+@router.post("/tickets", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
+async def create_ticket_for_user(
+    ticket_data: TicketCreate,
+    user_id: str = Query(..., description="User ID to create ticket for"),
+    current_user: UserResponse = Depends(get_admin_user)
+):
+    """Create a new support ticket on behalf of a user (admin only)"""
+    from app.models.ticket import TicketStatus, TicketResponse
+    from app.models.user import UserProfile
+    from app.services.notification_service import notification_service
+    
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid user ID format"
+        )
+    
+    db = get_database()
+    
+    # Verify the target user exists
+    target_user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Target user not found"
+        )
+    
+    # Create ticket document
+    ticket_dict = ticket_data.dict()
+    ticket_dict.update({
+        "created_by": ObjectId(user_id),  # Set to target user, not admin
+        "status": TicketStatus.OPEN,
+        "assigned_to": None,
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow(),
+        "resolved_at": None,
+        "resolution_note": None,
+        "message_count": 0,
+        "attachments": [],
+        "tags": [],
+        "created_by_admin": ObjectId(current_user.id)  # Track which admin created it
+    })
+    
+    result = await db.tickets.insert_one(ticket_dict)
+    created_ticket = await db.tickets.find_one({"_id": result.inserted_id})
+    
+    # Get target user profile for response
+    user_profile = UserProfile(
+        _id=str(target_user["_id"]),
+        username=target_user["username"],
+        full_name=target_user.get("full_name", ""),
+        role=target_user["role"],
+        department=target_user.get("department"),
+        avatar_url=target_user.get("avatar_url")
+    )
+    
+    # Prepare ticket response data with user profile
+    ticket_response_data = created_ticket.copy()
+    ticket_response_data.pop("created_by", None)  # Remove the ObjectId version
+    ticket_response_data["created_by"] = user_profile  # Add the UserProfile version
+    
+    # Format response
+    ticket_response = TicketResponse(**ticket_response_data)
+    
+    # Send real-time notifications to admins/agents about new ticket
+    await notification_service.notify_new_ticket(str(result.inserted_id))
+    
+    # Also notify the user that a ticket was created for them
+    from app.models.notification import NotificationType
+    await notification_service.create_and_broadcast_notification(
+        user_id=user_id,
+        notification_type=NotificationType.TICKET_CREATED,
+        title="New Ticket Created",
+        message=f"A support ticket '{ticket_data.title}' has been created for you by {current_user.full_name}",
+        data={
+            "ticket_id": str(result.inserted_id),
+            "created_by_admin": {
+                "id": str(current_user.id),
+                "name": current_user.full_name,
+                "username": current_user.username
+            }
+        },
+        ticket_id=str(result.inserted_id)
+    )
+    
+    return ticket_response 

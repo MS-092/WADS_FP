@@ -243,8 +243,8 @@ export default function UserTicketViewPage() {
           Back to My Tickets
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Ticket #{ticket._id?.slice(-6) || ticket.id}</h1>
-          <p className="text-muted-foreground">View ticket details and communicate with support</p>
+          <h1 className="text-2xl font-bold">Order #{ticket._id?.slice(-6) || ticket.id}</h1>
+          <p className="text-muted-foreground">View order details and communicate with our fragrance specialists</p>
         </div>
       </div>
 
@@ -375,9 +375,9 @@ export default function UserTicketViewPage() {
 
               {/* Message Input */}
               <div className="space-y-4">
-                <Label>Send a message to support</Label>
+                <Label>Send a message to our fragrance experts</Label>
                 <Textarea
-                  placeholder="Type your message here..."
+                  placeholder="Describe your fragrance inquiry or order concern..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   className="min-h-[100px]"
@@ -401,7 +401,7 @@ export default function UserTicketViewPage() {
                   </Button>
                 </div>
                 {ticket.status === "closed" && (
-                  <p className="text-sm text-muted-foreground">This ticket is closed and no longer accepts new messages.</p>
+                  <p className="text-sm text-muted-foreground">This order inquiry is closed and no longer accepts new messages.</p>
                 )}
               </div>
             </CardContent>
@@ -416,7 +416,7 @@ export default function UserTicketViewPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Your Support Agent
+                  Your Fragrance Specialist
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -433,7 +433,7 @@ export default function UserTicketViewPage() {
                   <div>
                     <h3 className="font-medium">{ticket.assigned_to.full_name || ticket.assigned_to.username}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {ticket.assigned_to.role === "admin" ? "Administrator" : "Technical Support"}
+                      {ticket.assigned_to.role === "admin" ? "Senior Fragrance Consultant" : "Fragrance Support Specialist"}
                     </p>
                     <div className="flex items-center gap-1 mt-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -444,7 +444,7 @@ export default function UserTicketViewPage() {
                 <Separator className="my-4" />
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    Department: <span className="font-medium">{ticket.assigned_to.department || "Support"}</span>
+                    Department: <span className="font-medium">{ticket.assigned_to.department || "Fragrance Support"}</span>
                   </p>
                 </div>
               </CardContent>
@@ -456,7 +456,7 @@ export default function UserTicketViewPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Tag className="h-5 w-5" />
-                Ticket Information
+                Order Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

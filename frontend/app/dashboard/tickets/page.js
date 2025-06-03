@@ -193,7 +193,7 @@ export default function TicketsPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            My Tickets
+            My Order Inquiries
             {isConnected ? (
               <Wifi className="h-5 w-5 text-green-600" title="Live updates enabled" />
             ) : (
@@ -201,7 +201,7 @@ export default function TicketsPage() {
             )}
           </h2>
           <p className="text-muted-foreground">
-            Track and manage your support requests
+            Track and manage your fragrance order inquiries and product questions
             {isConnected && (
               <span className="ml-2 text-green-600">• Live updates enabled</span>
             )}
@@ -210,21 +210,21 @@ export default function TicketsPage() {
         <Link href="/dashboard/tickets/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Ticket
+            New Inquiry
           </Button>
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filter Tickets</CardTitle>
-          <CardDescription>Search and filter your support tickets</CardDescription>
+          <CardTitle>Filter Inquiries</CardTitle>
+          <CardDescription>Search and filter your fragrance order inquiries</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 md:flex-row md:items-end">
             <div className="flex-1">
               <Input
-                placeholder="Search tickets..."
+                placeholder="Search inquiries..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -264,9 +264,9 @@ export default function TicketsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Your Tickets</CardTitle>
+          <CardTitle>Your Order Inquiries</CardTitle>
           <CardDescription>
-            {tickets.length} ticket{tickets.length !== 1 ? 's' : ''} found
+            {tickets.length} inquir{tickets.length !== 1 ? 'ies' : 'y'} found
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -287,15 +287,15 @@ export default function TicketsPage() {
           {loading && tickets.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Loading tickets...</span>
+              <span className="ml-2">Loading inquiries...</span>
             </div>
           ) : tickets.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No tickets found.</p>
+              <p className="text-muted-foreground">No inquiries found.</p>
               <Link href="/dashboard/tickets/new">
                 <Button className="mt-4">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create your first ticket
+                  Create your first inquiry
                 </Button>
               </Link>
             </div>
@@ -304,7 +304,7 @@ export default function TicketsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Subject</TableHead>
+                  <TableHead>Order ID</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Created</TableHead>

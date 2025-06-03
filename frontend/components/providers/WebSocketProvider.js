@@ -1,8 +1,7 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef } from 'react'
 import { useWebSocket } from '@/hooks/useWebSocket'
-import { toast } from 'sonner'
 
 const WebSocketContext = createContext(null)
 
@@ -16,7 +15,8 @@ export const useWebSocketContext = () => {
 
 export const WebSocketProvider = ({ children }) => {
   const websocketData = useWebSocket()
-  const [showDebugInfo, setShowDebugInfo] = useState(false)
+  const lastLogTimeRef = useRef(0)
+  const providerMountedRef = useRef(false)
   
   const {
     isConnected,
@@ -31,127 +31,43 @@ export const WebSocketProvider = ({ children }) => {
     onNotification,
     onTicketUpdate,
     onNewTicket,
-    onConnectionChange,
-    getDebugInfo
+    onConnectionChange
   } = websocketData
 
-  // Show connection status changes
+  // Track provider mounting
   useEffect(() => {
-    const unsubscribe = onConnectionChange(({ connected, status }) => {
-      console.log('[WebSocketProvider] Connection status changed:', { connected, status })
-      
-      if (status === 'connected') {
-        toast.success('WebSocket Connected', {
-          description: 'Real-time updates are now active',
-          duration: 3000,
-        })
-      } else if (status === 'reconnecting') {
-        toast.loading('Reconnecting...', {
-          description: 'Attempting to restore real-time connection',
-          duration: 5000,
-        })
-      } else if (status === 'error') {
-        toast.error('Connection Failed', {
-          description: connectionError || 'Could not establish real-time connection',
-          action: {
-            label: 'Retry',
-            onClick: forceReconnect
-          },
-          duration: 10000,
-        })
-      }
-    })
+    providerMountedRef.current = true
+    console.log('[WebSocketProvider] Provider mounted')
     
-    return unsubscribe
-  }, [onConnectionChange, connectionError, forceReconnect])
-
-  // Debug mode toggle (only in development)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const handleKeyPress = (e) => {
-        if (e.ctrlKey && e.shiftKey && e.code === 'KeyW') {
-          setShowDebugInfo(prev => !prev)
-          console.log('[WebSocket Debug]', getDebugInfo())
-        }
-      }
-      
-      window.addEventListener('keydown', handleKeyPress)
-      return () => window.removeEventListener('keydown', handleKeyPress)
+    return () => {
+      providerMountedRef.current = false
+      console.log('[WebSocketProvider] Provider unmounting')
     }
-  }, [getDebugInfo])
+  }, [])
 
-  // Log connection status for debugging
+  // Reduced logging - only log significant status changes every 10 seconds max
   useEffect(() => {
-    console.log('[WebSocketProvider] Status Update:', {
-      isConnected,
-      connectionStatus,
-      connectionError,
-      notificationCount: notifications.length,
-      ticketUpdateCount: ticketUpdates.length
-    })
+    if (process.env.NODE_ENV === 'development' && providerMountedRef.current) {
+      const now = Date.now()
+      const shouldLog = now - lastLogTimeRef.current > 10000 // Only log every 10 seconds
+      
+      if (shouldLog) {
+        console.log('[WebSocketProvider] Status Update:', {
+          isConnected,
+          connectionStatus,
+          hasError: !!connectionError,
+          notificationCount: notifications.length,
+          ticketUpdateCount: ticketUpdates.length,
+          timestamp: new Date().toISOString()
+        })
+        lastLogTimeRef.current = now
+      }
+    }
   }, [isConnected, connectionStatus, connectionError, notifications.length, ticketUpdates.length])
 
   return (
     <WebSocketContext.Provider value={websocketData}>
       {children}
-      
-      {/* Debug Info Panel (Development Only) */}
-      {showDebugInfo && process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded-lg shadow-lg max-w-sm z-50 text-xs">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-bold">WebSocket Debug</h3>
-            <button 
-              onClick={() => setShowDebugInfo(false)}
-              className="text-gray-400 hover:text-white"
-            >
-              ×
-            </button>
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span>Status:</span>
-              <span className={`font-mono ${
-                isConnected ? 'text-green-400' : 'text-red-400'
-              }`}>
-                {connectionStatus}
-              </span>
-            </div>
-            
-            {connectionError && (
-              <div className="text-red-400 text-xs break-words">
-                Error: {connectionError}
-              </div>
-            )}
-            
-            <div className="flex justify-between">
-              <span>Notifications:</span>
-              <span className="font-mono text-blue-400">{notifications.length}</span>
-            </div>
-            
-            <div className="flex justify-between">
-              <span>Ticket Updates:</span>
-              <span className="font-mono text-yellow-400">{ticketUpdates.length}</span>
-            </div>
-            
-            <div className="pt-2 space-y-1">
-              <button
-                onClick={forceReconnect}
-                className="w-full bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
-              >
-                Force Reconnect
-              </button>
-              
-              <button
-                onClick={() => console.log('[WebSocket Debug] Full Info:', getDebugInfo())}
-                className="w-full bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs"
-              >
-                Log Full Debug Info
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </WebSocketContext.Provider>
   )
 } 

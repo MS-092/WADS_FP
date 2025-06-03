@@ -14,6 +14,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { AuthProvider } from "@/lib/auth-context"
+import { WebSocketProvider } from "@/components/providers/WebSocketProvider"
+import { NotificationDropdown } from "@/components/notification-dropdown"
 
 export function DashboardSidebar({ isAdmin = false, children }) {
   const pathname = usePathname()
@@ -72,54 +75,59 @@ export function DashboardSidebar({ isAdmin = false, children }) {
   const menuItems = isAdmin ? adminMenuItems : userMenuItems
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen">
-        <Sidebar>
-          <SidebarHeader className="border-b px-6 py-3">
-            <div className="flex items-center gap-2 font-bold">
-              <ShieldCheck className="h-6 w-6" />
-              <span>Olfactory Engineers</span>
+    <AuthProvider>
+      <WebSocketProvider>
+        <SidebarProvider>
+          <div className="flex min-h-screen">
+            <Sidebar>
+              <SidebarHeader className="border-b px-6 py-3">
+                <div className="flex items-center gap-2 font-bold">
+                  <ShieldCheck className="h-6 w-6" />
+                  <span>Olfactory Engineers</span>
+                </div>
+              </SidebarHeader>
+              <SidebarContent>
+                <SidebarMenu>
+                  {menuItems.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={pathname === item.href}>
+                        <Link href={item.href}>
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarContent>
+              <SidebarFooter className="border-t p-6">
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link href="/login">
+                        <LogOut className="h-5 w-5" />
+                        <span>Logout</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarFooter>
+            </Sidebar>
+            <div className="flex-1">
+              <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
+                <SidebarTrigger />
+                <div className="ml-auto flex items-center gap-4">
+                  <NotificationDropdown isAdmin={isAdmin} />
+                  <Button variant="outline" size="sm">
+                    {isAdmin ? "Admin Account" : "User Account"}
+                  </Button>
+                </div>
+              </header>
+              <main className="flex-1 p-6">{children}</main>
             </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href}>
-                    <Link href={item.href}>
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter className="border-t p-6">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/login">
-                    <LogOut className="h-5 w-5" />
-                    <span>Logout</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-        <div className="flex-1">
-          <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
-            <SidebarTrigger />
-            <div className="ml-auto flex items-center gap-4">
-              <Button variant="outline" size="sm">
-                {isAdmin ? "Admin Account" : "User Account"}
-              </Button>
-            </div>
-          </header>
-          <main className="flex-1 p-6">{children}</main>
-        </div>
-      </div>
-    </SidebarProvider>
+          </div>
+        </SidebarProvider>
+      </WebSocketProvider>
+    </AuthProvider>
   )
 }

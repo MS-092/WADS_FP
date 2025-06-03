@@ -144,10 +144,12 @@ export default function ReportsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="technical">Technical</SelectItem>
-                        <SelectItem value="billing">Billing</SelectItem>
-                        <SelectItem value="account">Account</SelectItem>
-                        <SelectItem value="feature">Feature Request</SelectItem>
+                        <SelectItem value="technical">Allergic Reactions</SelectItem>
+                        <SelectItem value="billing">Order & Billing</SelectItem>
+                        <SelectItem value="account">Defective/Faulty Products</SelectItem>
+                        <SelectItem value="feature_request">Fragrance Recommendations</SelectItem>
+                        <SelectItem value="bug_report">Website Issues</SelectItem>
+                        <SelectItem value="general">General Questions</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
