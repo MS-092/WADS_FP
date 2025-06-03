@@ -1,6 +1,6 @@
 // API configuration for Help Desk System Frontend
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://wads-fp-beta.vercel.app/';
 
 // API endpoints
 export const API_ENDPOINTS = {
