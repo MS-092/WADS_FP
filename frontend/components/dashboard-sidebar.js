@@ -55,11 +55,6 @@ export function DashboardSidebar({ isAdmin = false, children }) {
       icon: Users,
     },
     {
-      title: "Reports",
-      href: "/admin/reports",
-      icon: BarChart3,
-    },
-    {
       title: "Settings",
       href: "/admin/settings",
       icon: Settings,
